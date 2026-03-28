@@ -9,7 +9,7 @@ const port = process.env.PORT
 app.use(express.json())
 
 app.get("/", (req, res) => {
-    res.end("Hey there")
+    res.end("Hey there my dear losser")
 })
 
 app.use("/api/auth" ,authRouter)
