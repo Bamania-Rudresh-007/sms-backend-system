@@ -9,11 +9,17 @@ const protect = (req, res, next) => {
             })
         }
 
-        const token = headersAuthorization.split(" ")[0];
+        const token = headersAuthorization.split(" ")[1];
         const decode = jwt.verify(token, process.env.JWT_SECRET);
 
-        req.user = token;
-        next()
+        if(decode){
+            req.user = decode;
+            next()
+        }
+        else{
+            return res.status(401).json({ message: "Token verification failed" });
+        }
+
     }   
     catch(error){
         res.status(401).json({
