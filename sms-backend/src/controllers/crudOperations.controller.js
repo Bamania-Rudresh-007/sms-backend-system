@@ -39,7 +39,7 @@ const getAllStudent = async(req, res) => {
 
 const updateStudent = async(req, res) => {
     try{
-        const updatedStudent = await Student.findByIdAndUpdate(req.body._id);
+        const updatedStudent = await Student.findByIdAndUpdate(req.params.id);
 
         res.status(204).json({
             message: "Student updated successfully",
@@ -57,7 +57,7 @@ const updateStudent = async(req, res) => {
 
 const deleteStudent = async(req, res) => {
     try{
-        const deletedStudent = await Student.findByIdAndDelete(req.body._id);
+        const deletedStudent = await Student.findByIdAndDelete(req.params.id);
 
         res.status(204).json({
             message: "Student deleted Successfully",
