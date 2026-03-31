@@ -37,6 +37,15 @@ const getAllStudent = async(req, res) => {
     }
 }
 
+const updateStudent = async(req, res) => {
+    try{
+        const updatedStudent = req.body;
 
+        const updateStudent = Student.findByIdAndUpdate(req.body.id, )
+    }
+    catch(error){
+
+    }
+}
 
 export {getAllStudent ,addStudent};    
