@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import InputPass from "./inputPass";
 import { useUsers } from "../../../contexts/UsersContext.jsx"
 import Home from "../../Home/Home.jsx";
+import API from "../../../api/api.js";
 
 function LogIn() {
     // navigate to navigate anywhere in webpage
@@ -26,27 +27,23 @@ function LogIn() {
 
     // checking wheather they are signedUp or not...?
 
-    const handleVarificationOfUser = () => {
+    const handleVarificationOfUser = async () => {
         
-        let existingData = JSON.parse(localStorage.getItem("signUpUsers")) || [];
+        if(!loginUser.email.includes("@") || loginUser.password === "" ){
+            alert("Invalid email or password");
+        }
+        
         let isLogin = false;
 
-        for (let i = 0; i < existingData.length; i++) {
-            if (
-                existingData[i].email === loginUser.email &&
-                existingData[i].password === loginUser.password
-            ) {
+        await API.post("/auth/login", loginUser)
+            .then((res) => {
+                console.log("User logined successfully", res);
                 isLogin = true;
-                localStorage.setItem("isLogin", JSON.stringify(true));
-                localStorage.setItem("currentLogInUser", JSON.stringify(existingData[i]));
-                break; // stop loop once match is found
-            }
-        }
+            })
+            .catch((err) => console.error(err))
 
         if (isLogin) {
             navigate("/home");
-        } else {
-            alert("Invalid email or password");
         }
     };
 
