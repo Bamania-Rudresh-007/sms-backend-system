@@ -4,6 +4,7 @@ import SignUpInput from "./Input.jsx";
 import InputPass from "./inputPass.jsx";
 import { useState, useEffect } from "react";
 import { useUsers } from "../../../contexts/UsersContext.jsx";
+import API from "../../../api/api.js";
 
 function SignUp() {
 
@@ -21,10 +22,16 @@ function SignUp() {
 
   //  handles the submit button of the signUp Form 
   const handleSubmit = (e) => {
-    const processedUserArray = arrayOfMember(signUpUser);
+    // const processedUserArray = arrayOfMember(signUpUser);
 
     if (signUpUser.name != "") {
-      setMember((prev) => [...prev, ...processedUserArray]);
+    //   setMember((prev) => [...prev, ...processedUserArray]);
+      console.log("Signup User:- ", signUpUser)
+    //   console.log("proccessed User:- ", processedUserArray)
+        API.post("/auth/signup", signUpUser)
+            .then((res) => console.log(res))
+            .catch((err) => console.error(err))
+            
       setSignUpUser({ name: "", email: "", password: "" });
       localStorage.setItem("currentLogInUser", JSON.stringify(signUpUser));
     }

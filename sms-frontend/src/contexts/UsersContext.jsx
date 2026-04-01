@@ -4,7 +4,7 @@ import useLocalUsers from "./useLocalUsers";
 const UsersContext = createContext();
 
 export function UsersProvider({ children }) {
-  const [member, setMember] = useLocalUsers();
+//   const [member, setMember] = useLocalUsers();
     const [signUpUser, setSignUpUser] = useState({ name: "", email: "", password: "" });
     const [loginUser, setLoginUser] = useState({email: "", password: ""});
 
@@ -29,8 +29,8 @@ export function UsersProvider({ children }) {
   };
 
   const values = {
-    member,
-    setMember,
+    // member,
+    // setMember,
     arrayOfMember,
     setIsLogin,
     signUpUser,

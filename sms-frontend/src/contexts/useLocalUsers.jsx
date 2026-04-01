@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import API from "../api/api.js";
 
 export default function useLocalUsers() {
     const [user, setUser] = useState(() => {
@@ -11,13 +12,16 @@ export default function useLocalUsers() {
         }
     });
 
-    useEffect(() => {
-        try {
-            localStorage.setItem('signUpUsers', JSON.stringify( user));
-        } catch (error) {
-            console.error("Failed to save users to local storage",error);
-        }
-    }, [user])
+    // useEffect(() => {
+    //     try {
+    //         // localStorage.setItem('signUpUsers', JSON.stringify( user));
+    //         API.post("/auth/signup", JSON.stringify(user))
+    //             .then((res) => console.log(res))
+    //             .catch((err) => console.error(err))
+    //     } catch (error) {
+    //         console.error("Failed to register user in database",error);
+    //     }
+    // }, [user])
 
     useEffect(() => {
         const handleUsersLocalStorage = (e) => {
