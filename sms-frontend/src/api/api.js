@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = axios.create({baseURL: "http://localhost:7000/"});
+const API = axios.create({baseURL: "http://localhost:7000/api/"});
 
 API.interceptors.request.use((config) => {
     const token = JSON.parse(localStorage.getItem("sms-token"));    
