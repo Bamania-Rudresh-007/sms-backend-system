@@ -18,8 +18,6 @@ function AddStudent() {
 
     const isDark = JSON.parse(localStorage.getItem("Theme")) === "Dark Mode";
 
-    const uniqueID = UniqueIdGenerator();
-
     const handleAddStudentChanges = (e) => {
         const {id , value} = e.target;
         setCurrentStudent({...currentStudent, [id]: value});
@@ -27,9 +25,7 @@ function AddStudent() {
 
     const handleAddStudentBtn = () => {
         if(Object.values(currentStudent).every(val => val !== "")){
-            const studentDataWithId = {...currentStudent, id: uniqueID}
-            localStorage.setItem("lastUpdatedId", JSON.stringify(uniqueID));
-            addStudent(studentDataWithId)
+            addStudent(currentStudent);
             setCurrentStudent({
                 name: "",
                 email: "",
