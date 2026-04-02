@@ -29,6 +29,7 @@ function Home() {
   const handleLogout = () => {
       setIsLogin(() => {
           localStorage.setItem("isLogin", JSON.stringify(false));
+          localStorage.removeItem("sms-token");
       })
     navigate("/");
     window.location.reload();
