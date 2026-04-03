@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useState } from "react";
+import { useEffect, useState } from "react";
 import API from "../api/api.js"
 
 export default function useStudentServices() {
@@ -38,8 +38,6 @@ export default function useStudentServices() {
     // For addStudent component...
     const addStudent = (currentStudent) => {
         try {
-            // const updatedStudent = [...students, currentStudent];
-            // setStudents(updatedStudent)
             console.log(currentStudent);
             API.post("/students", currentStudent)
                 .then((res) => console.log(res))
@@ -52,7 +50,6 @@ export default function useStudentServices() {
 
     // Handles the logic for updating students data
     const updateStudent = async(updatedStudent) => {
-        // setStudents((prev) => prev.map(item => item.id == updatedStudent.id ? updatedStudent: item))
         console.log(updatedStudent)
 
         const res = await API.patch(`/students/${updatedStudent._id}`, updatedStudent)
@@ -66,10 +63,6 @@ export default function useStudentServices() {
         }
         else{
             if(data.confirm.toLowerCase() == "delete"){
-            // data.id ? setStudents((prev) => prev.filter((item) => item.id != data.id)) : alert("Please give the valid Student ID");
-            // console.log(data)
-
-            // console.log(data)
                 try{
                     const res = await API.delete(`/students/${data.id}`);
                     console.log(res);
@@ -84,7 +77,6 @@ export default function useStudentServices() {
         }
 
     };
-    
 
     return { addStudent, updateStudent, deleteStudent, UniqueIdGenerator, students, setStudents };
 }

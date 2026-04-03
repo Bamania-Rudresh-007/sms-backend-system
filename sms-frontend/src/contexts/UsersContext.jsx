@@ -1,10 +1,7 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import useLocalUsers from "./useLocalUsers";
-
+import { createContext, useContext, useState } from "react";
 const UsersContext = createContext();
 
 export function UsersProvider({ children }) {
-//   const [member, setMember] = useLocalUsers();
     const [signUpUser, setSignUpUser] = useState({ name: "", email: "", password: "" });
     const [loginUser, setLoginUser] = useState({email: "", password: ""});
 
@@ -15,10 +12,6 @@ export function UsersProvider({ children }) {
     return storedIsLoginInfo ? JSON.parse(storedIsLoginInfo) : false;
   });
 
-    // useEffect(() => {
-    //     console.log(isLogin);
-    // }, [isLogin]);
-
 
   const arrayOfMember = (data) => {
     const dataArray = Array.isArray(data) ? data : [data];
@@ -28,9 +21,7 @@ export function UsersProvider({ children }) {
     });
   };
 
-  const values = {
-    // member,
-    // setMember,
+  const values = {    
     arrayOfMember,
     setIsLogin,
     signUpUser,

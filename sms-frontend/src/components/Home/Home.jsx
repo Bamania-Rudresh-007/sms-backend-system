@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 
 function Home() {
     const navigate = useNavigate();
-    const {setIsLogin, loginUser} =  useUsers();
+    const {setIsLogin} =  useUsers();
     
     const [currentTheme, setCurrentTheme] = useState(() => {
         try {

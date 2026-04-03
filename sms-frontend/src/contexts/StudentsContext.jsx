@@ -4,20 +4,7 @@ const StudentsContext = createContext();
 
 export function StudentsProvider({children}){
 
-    // const [student , setStudent] = useState(() => {
-    //     try {
-    //         const savedStudent = localStorage.getItem('students')
-    //         return savedStudent ? JSON.parse(savedStudent) : []; 
-    //     } catch (error) {
-    //         console.error("Failed to fetch students data from local storage", error);
-    //         return [];
-    //     }
-    // })
-
     const [deletedStudent , setDeletedStudent] = useState({id: "", confirm: ""});
-
-
-
 
     const values = {
         deletedStudent,

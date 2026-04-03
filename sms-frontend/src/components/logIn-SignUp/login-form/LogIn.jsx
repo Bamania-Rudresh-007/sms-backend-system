@@ -13,9 +13,6 @@ function LogIn() {
     // for hide/show functionality
     const [passType, setPassType] = useState("password");
 
-    // for the current login varification
-    // const [loginUser, setLoginUser] = useState({email: "", password: ""});
-
     // the main source of indentifing wheather the loginUser is logdin or not..
     const { loginUser, setLoginUser} = useUsers();
 
