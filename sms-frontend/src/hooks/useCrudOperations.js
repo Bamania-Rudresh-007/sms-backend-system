@@ -60,14 +60,23 @@ export default function useStudentServices() {
 
     };
 
-    const deleteStudent = (data) => {
+    const deleteStudent = async (data) => {
         if(students.length < 0){
             return false;
         }
         else{
             if(data.confirm.toLowerCase() == "delete"){
-            data.id ? setStudents((prev) => prev.filter((item) => item.id != data.id)) : alert("Please give the valid Student ID");
-            console.log(data)
+            // data.id ? setStudents((prev) => prev.filter((item) => item.id != data.id)) : alert("Please give the valid Student ID");
+            // console.log(data)
+
+            // console.log(data)
+                try{
+                    const res = await API.delete(`/students/${data.id}`);
+                    console.log(res);
+                }
+                catch(err){
+                    console.log(err);
+                }
             }
             else{
                 alert("Confim through writing delete in below given form...");

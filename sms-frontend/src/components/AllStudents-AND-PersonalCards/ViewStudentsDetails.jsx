@@ -43,7 +43,7 @@ function ViewStudentDetails() {
     const handleDeleteBtn = () => {
         navigate("/deleteStudent")
         console.log(currentStudent)
-        setDeletedStudent({...deletedStudent, id: currentStudent.id})
+        setDeletedStudent({...deletedStudent, id: currentStudent._id})
     }
 
   return (
