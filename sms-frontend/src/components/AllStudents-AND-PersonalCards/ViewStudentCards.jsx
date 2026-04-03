@@ -5,28 +5,37 @@ import { data } from "../../dummyData/data.js";
 
 function ViewStudentCards() {
   const { students } = useStudentServices();
-  const [filterStudents , setFilterStudents] = useState([]);
   const navigate = useNavigate();
   const isDark = JSON.parse(localStorage.getItem("Theme")) === "Dark Mode";
-  let cuurrentViewType = JSON.parse(localStorage.getItem("currentViewStudentsThrough"));
 
-  // ── Modal UI state (new) ──────────────────────────────────────────────────
-  const [showModal, setShowModal] = useState(true);
-  const [modalSelected, setModalSelected] = useState(null); // "own" | "random"
-  const [dummyLimit, setDummyLimit] = useState(20);
-  const [modalError, setModalError] = useState("");
-  const [baseStudent, setBaseStudents] = useState([]);
+  // ── Core state ────────────────────────────────────────────────────────────
+  const [baseStudents, setBaseStudents]     = useState([]);   // source of truth for current dataset
+  const [filterStudents, setFilterStudents] = useState([]);   // what's actually rendered
+
+  // ── Modal state ───────────────────────────────────────────────────────────
+  const [showModal, setShowModal]       = useState(false);
+  const [modalSelected, setModalSelected] = useState("own");  // "own" | "random"
+  const [dummyLimit, setDummyLimit]     = useState(20);
+  const [modalError, setModalError]     = useState("");
   const MAX = 150;
 
+  // ── On first load: show saved students immediately ────────────────────────
+  useEffect(() => {
+    setBaseStudents(students);
+    setFilterStudents(students);
+  }, [students]);  // re-sync if students array updates
+
+  // ── Limit input handler ───────────────────────────────────────────────────
   function handleModalLimitChange(val) {
     const num = parseInt(val);
-    if (!val) { setDummyLimit(""); setModalError(""); return; }
+    if (!val)               { setDummyLimit(""); setModalError(""); return; }
     if (isNaN(num) || num < 1) { setModalError("Enter a number between 1 and 150."); return; }
-    if (num > MAX) { setDummyLimit(MAX); setModalError(`Max limit is ${MAX}.`); return; }
+    if (num > MAX)          { setDummyLimit(MAX); setModalError(`Max limit is ${MAX}.`); return; }
     setDummyLimit(num);
     setModalError("");
   }
 
+  // ── Modal confirm: swap dataset ───────────────────────────────────────────
   function handleModalConfirm() {
     if (!modalSelected) { setModalError("Please choose a data source."); return; }
     if (modalSelected === "random") {
@@ -37,60 +46,74 @@ function ViewStudentCards() {
     if (modalSelected === "own") {
       localStorage.setItem("currentViewStudentsThrough", JSON.stringify("existingStudent"));
       setBaseStudents(students);
-      setFilterStudents(students); // show real students
+      setFilterStudents(students);
     } else {
       localStorage.setItem("currentViewStudentsThrough", JSON.stringify("Data"));
-      setBaseStudents(data.slice(0, dummyLimit))
-      setFilterStudents(data.slice(0, dummyLimit)); // show only dummy, hide real
+      const slice = data.slice(0, parseInt(dummyLimit));
+      setBaseStudents(slice);
+      setFilterStudents(slice);
     }
 
-    cuurrentViewType = JSON.parse(localStorage.getItem("currentViewStudentsThrough"));
     setShowModal(false);
   }
-  // ─────────────────────────────────────────────────────────────────────────
 
-  useEffect(() => {
-    setFilterStudents(students);
-  }, [])    
-
-  const handleFilter = (e) => {
-    const selectedCourse = e.target.value;
-    let filteredStudent = baseStudent.filter((student) => student.course == selectedCourse)
-    if(e.target.value == "All"){
-      setFilterStudents(baseStudent) 
-      return;
+  // ── Source selector dropdown ──────────────────────────────────────────────
+  function handleSourceChange(e) {
+    const val = e.target.value;
+    if (val === "Dummy data") {
+      setModalSelected("random");   // pre-select random in modal
+      setShowModal(true);
+    } else if (val === "Saved Users") {
+      // Load saved students directly, no modal needed
+      setBaseStudents(students);
+      setFilterStudents(students);
+      localStorage.setItem("currentViewStudentsThrough", JSON.stringify("existingStudent"));
     }
-    setFilterStudents(filteredStudent);
-  }   
-
-  const handleSearchByName = (e) => {
-    const { value } = e.target;
-    if(value == ""){
-      console.log(true);
-      setFilterStudents(baseStudent)
-      return;
-    }
-    const filterByName = filterStudents.filter((student) => {
-      return student.name.toLowerCase().includes(value.toLowerCase())
-    })
-    setFilterStudents(filterByName)
   }
 
-  // ── Modal styles helpers ──────────────────────────────────────────────────
+  // ── Filter by course ──────────────────────────────────────────────────────
+  function handleFilter(e) {
+    const selectedCourse = e.target.value;
+    if (selectedCourse === "All") {
+      setFilterStudents(baseStudents);
+      return;
+    }
+    setFilterStudents(baseStudents.filter((s) => s.course === selectedCourse));
+  }
+
+  // ── Search by name ────────────────────────────────────────────────────────
+  function handleSearchByName(e) {
+    const { value } = e.target;
+    if (!value) {
+      setFilterStudents(baseStudents);
+      return;
+    }
+    setFilterStudents(
+      baseStudents.filter((s) => s.name?.toLowerCase().includes(value.toLowerCase()))
+    );
+  }
+
+  // ── Style helpers ─────────────────────────────────────────────────────────
   const cardBg   = isDark ? "bg-gray-800 border-gray-700"   : "bg-white border-gray-200";
   const titleCls = isDark ? "text-white"                    : "text-gray-800";
   const subCls   = isDark ? "text-gray-400"                 : "text-gray-500";
 
+  // ── Option card (modal) ───────────────────────────────────────────────────
   function OptionCard({ icon, label, desc, active, onClick }) {
-    const base = "cursor-pointer flex items-start gap-4 p-4 rounded-2xl border-2 transition-all duration-200 select-none";
+    const base  = "cursor-pointer flex items-start gap-4 p-4 rounded-2xl border-2 transition-all duration-200 select-none";
     const theme = active
       ? "border-indigo-500 bg-indigo-500/10"
       : isDark
         ? "border-gray-700 hover:border-gray-500 bg-gray-700/40"
         : "border-gray-200 hover:border-indigo-200 bg-gray-50";
     return (
-      <div className={`${base} ${theme}`} onClick={onClick} role="button" tabIndex={0}
-        onKeyDown={(e) => e.key === "Enter" && onClick()}>
+      <div
+        className={`${base} ${theme}`}
+        onClick={onClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === "Enter" && onClick()}
+      >
         {/* Radio dot */}
         <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all
           ${active ? "border-indigo-500" : isDark ? "border-gray-600" : "border-gray-300"}`}>
@@ -111,18 +134,19 @@ function ViewStudentCards() {
       </div>
     );
   }
-  // ─────────────────────────────────────────────────────────────────────────
 
+  // ─────────────────────────────────────────────────────────────────────────
   return (
     <div className={`min-h-screen p-6 md:p-10 transition-colors duration-300 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
 
-      {/* ── Data Source Modal (new) ──────────────────────────────────────── */}
+      {/* ── Data Source Modal ──────────────────────────────────────────────── */}
       {showModal && (
         <div className={`fixed inset-0 z-50 flex items-center justify-center p-4
-          ${isDark ? "bg-gray-900/80" : "bg-gray-100/80"} backdrop-blur-sm`}>
-          <div className={`w-full max-w-md rounded-2xl border shadow-2xl p-6 ${cardBg}`}
-            style={{ boxShadow: isDark ? "0 0 60px rgba(99,102,241,0.15)" : "0 0 60px rgba(99,102,241,0.1)" }}>
-
+          ${isDark ? "bg-black/60" : "bg-gray-900/40"} backdrop-blur-sm`}>
+          <div
+            className={`w-full max-w-md rounded-2xl border shadow-2xl p-6 ${cardBg}`}
+            style={{ boxShadow: isDark ? "0 0 60px rgba(99,102,241,0.15)" : "0 0 60px rgba(99,102,241,0.1)" }}
+          >
             {/* Modal Header */}
             <div className="mb-6">
               <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-4
@@ -163,21 +187,16 @@ function ViewStudentCards() {
                     ${isDark ? "text-gray-400" : "text-indigo-500"}`}>
                     Number of students
                   </label>
-                  <span className={`text-sm font-bold tabular-nums
-                    ${isDark ? "text-indigo-300" : "text-indigo-700"}`}>
+                  <span className={`text-sm font-bold tabular-nums ${isDark ? "text-indigo-300" : "text-indigo-700"}`}>
                     {dummyLimit || 0} / {MAX}
                   </span>
                 </div>
-
-                {/* Slider */}
                 <input
                   type="range" min="1" max={MAX}
                   value={dummyLimit || 1}
                   onChange={(e) => handleModalLimitChange(e.target.value)}
                   className="w-full accent-indigo-500 mb-3 cursor-pointer"
                 />
-
-                {/* Quick presets */}
                 <div className="flex gap-2 flex-wrap">
                   {[10, 25, 50, 100, 150].map((n) => (
                     <button
@@ -185,12 +204,8 @@ function ViewStudentCards() {
                       onClick={() => handleModalLimitChange(String(n))}
                       className={`text-xs px-2.5 py-1 rounded-lg border transition font-medium
                         ${dummyLimit === n
-                          ? isDark
-                            ? "bg-indigo-600 border-indigo-600 text-white"
-                            : "bg-indigo-500 border-indigo-500 text-white"
-                          : isDark
-                            ? "border-gray-600 text-gray-400 hover:border-indigo-500 hover:text-indigo-300"
-                            : "border-indigo-200 text-indigo-400 hover:bg-indigo-100"}`}
+                          ? isDark ? "bg-indigo-600 border-indigo-600 text-white" : "bg-indigo-500 border-indigo-500 text-white"
+                          : isDark ? "border-gray-600 text-gray-400 hover:border-indigo-500 hover:text-indigo-300" : "border-indigo-200 text-indigo-400 hover:bg-indigo-100"}`}
                     >
                       {n}
                     </button>
@@ -209,27 +224,36 @@ function ViewStudentCards() {
               </p>
             )}
 
-            {/* Confirm Button */}
-            <button
-              onClick={handleModalConfirm}
-              disabled={!modalSelected}
-              className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-[0.98]
-                ${modalSelected
-                  ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-900/20 cursor-pointer"
-                  : isDark
-                    ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-                    : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
-            >
-              {modalSelected === "own"
-                ? "Load My Students →"
-                : modalSelected === "random"
-                  ? `Load ${dummyLimit || 0} Random Students →`
-                  : "Select a Source to Continue"}
-            </button>
+            {/* Action Row — Cancel + Confirm */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowModal(false)}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all border cursor-pointer
+                  ${isDark
+                    ? "border-gray-600 text-gray-400 hover:border-gray-400 hover:text-gray-200"
+                    : "border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-700"}`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleModalConfirm}
+                disabled={!modalSelected}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-[0.98]
+                  ${modalSelected
+                    ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-900/20 cursor-pointer"
+                    : isDark ? "bg-gray-700 text-gray-500 cursor-not-allowed" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
+              >
+                {modalSelected === "own"
+                  ? "Load My Students →"
+                  : modalSelected === "random"
+                    ? `Load ${dummyLimit || 0} Students →`
+                    : "Select a Source"}
+              </button>
+            </div>
           </div>
         </div>
       )}
-      {/* ── End Modal ────────────────────────────────────────────────────── */}
+      {/* ── End Modal ──────────────────────────────────────────────────────── */}
 
       {/* Back Button */}
       <button
@@ -242,70 +266,96 @@ function ViewStudentCards() {
         Back
       </button>
 
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
-        <h2 className={`text-3xl font-bold ${isDark ? "text-white" : "text-gray-800"}`}>Student Directory</h2>
-        
-        {/* Filter */}
-        <div className="flex flex-col gap-1 w-full md:w-auto">
-          <label className={`font-medium text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}>Filter by Course:</label>
-          <select
-            className={`w-full md:w-auto px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition ${isDark ? "bg-gray-700 border-gray-600 text-gray-200" : "bg-white border-gray-200 text-gray-600"}`}
-            onChange={handleFilter}
-          >
-            <option>All</option>
-            <option>Diploma in Computer Engineering</option>
-            <option>Diploma in Information Technology</option>
-            <option>Diploma in Mechanical Engineering</option>
-            <option>Diploma in Electrical Engineering</option>
-            <option>Diploma in Civil Engineering</option>
-            <option>Diploma in Electronics & Communication</option>
-          </select>
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-8 gap-6">
+        <div>
+          <h2 className={`text-3xl font-bold ${isDark ? "text-white" : "text-gray-800"}`}>Student Directory</h2>
+          <p className={`text-sm mt-1 ${subCls}`}>{filterStudents.length} student{filterStudents.length !== 1 ? "s" : ""} shown</p>
+        </div>
+
+        {/* Controls */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          {/* Data source selector */}
+          <div className="flex flex-col gap-1">
+            <label className={`font-medium text-xs uppercase tracking-wide ${isDark ? "text-gray-400" : "text-gray-500"}`}>Data Source</label>
+            <select
+              defaultValue=""
+              className={`px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition cursor-pointer
+                ${isDark ? "bg-gray-700 border-gray-600 text-gray-200" : "bg-white border-gray-200 text-gray-600"}`}
+              onChange={handleSourceChange}
+            >
+              <option value="" disabled>Choose source…</option>
+              <option value="Saved Users">Saved Users</option>
+              <option value="Dummy data">Dummy Data</option>
+            </select>
+          </div>
+
+          {/* Course filter */}
+          <div className="flex flex-col gap-1">
+            <label className={`font-medium text-xs uppercase tracking-wide ${isDark ? "text-gray-400" : "text-gray-500"}`}>Filter by Course</label>
+            <select
+              className={`px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition cursor-pointer
+                ${isDark ? "bg-gray-700 border-gray-600 text-gray-200" : "bg-white border-gray-200 text-gray-600"}`}
+              onChange={handleFilter}
+            >
+              <option>All</option>
+              <option>Diploma in Computer Engineering</option>
+              <option>Diploma in Information Technology</option>
+              <option>Diploma in Mechanical Engineering</option>
+              <option>Diploma in Electrical Engineering</option>
+              <option>Diploma in Civil Engineering</option>
+              <option>Diploma in Electronics &amp; Communication</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      {/* Search student by name */}
-      <div className="relative mb-6">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg 
-            className={`h-5 w-5 ${isDark ? "text-gray-500" : "text-gray-400"}`} 
-            fill="none" viewBox="0 0 24 24" stroke="currentColor"
-          >
+      {/* ── Search ─────────────────────────────────────────────────────────── */}
+      <div className="relative mb-8">
+        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <svg className={`h-4 w-4 ${isDark ? "text-gray-500" : "text-gray-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
         <input
           type="text"
-          placeholder="Search students by name..."
-          className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 
-            ${isDark 
-              ? "bg-gray-700 border-gray-600 text-gray-200 placeholder-gray-500" 
-              : "bg-white border-gray-200 text-gray-700 placeholder-gray-400"
-            }`}
+          placeholder="Search students by name…"
+          className={`w-full pl-11 pr-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400
+            ${isDark
+              ? "bg-gray-700 border-gray-600 text-gray-200 placeholder-gray-500"
+              : "bg-white border-gray-200 text-gray-700 placeholder-gray-400"}`}
           onChange={handleSearchByName}
         />
       </div>
 
-      {/* Cards Grid */}
+      {/* ── Cards Grid ─────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-        {filterStudents && filterStudents.length > 0 ? (
+        {filterStudents.length > 0 ? (
           filterStudents.map((student) => (
             <div
               key={student._id}
-              className={`rounded-2xl shadow-sm border p-5 flex flex-col hover:shadow-md transition ${isDark ? "bg-gray-800 border-gray-700 hover:border-indigo-500" : "bg-white border-gray-100 hover:border-indigo-100"}`}
+              className={`rounded-2xl shadow-sm border p-5 flex flex-col hover:shadow-md transition-all duration-200
+                ${isDark
+                  ? "bg-gray-800 border-gray-700 hover:border-indigo-500"
+                  : "bg-white border-gray-100 hover:border-indigo-200 hover:shadow-indigo-50"}`}
             >
               {/* Avatar + Name + Course */}
               <div className="flex items-center gap-3 mb-4">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${isDark ? "bg-indigo-900 text-indigo-300" : "bg-indigo-100 text-indigo-600"}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0
+                  ${isDark ? "bg-indigo-900 text-indigo-300" : "bg-indigo-100 text-indigo-600"}`}>
                   {student.name?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className={`font-semibold text-sm leading-tight truncate ${isDark ? "text-white" : "text-gray-800"}`}>{student.name}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full mt-1 w-fit max-w-full truncate ${isDark ? "text-indigo-300 bg-indigo-900/50" : "text-indigo-500 bg-indigo-50"}`}>{student.course}</span>
+                  <span className={`font-semibold text-sm leading-tight truncate ${isDark ? "text-white" : "text-gray-800"}`}>
+                    {student.name}
+                  </span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full mt-1 w-fit max-w-full truncate
+                    ${isDark ? "text-indigo-300 bg-indigo-900/50" : "text-indigo-500 bg-indigo-50"}`}>
+                    {student.course}
+                  </span>
                 </div>
               </div>
 
-              {/* Divider */}
               <div className={`border-t mb-4 ${isDark ? "border-gray-700" : "border-gray-100"}`} />
 
               {/* Info */}
@@ -316,7 +366,9 @@ function ViewStudentCards() {
                 </div>
                 <div className="flex justify-between gap-2">
                   <span className={`flex-shrink-0 ${isDark ? "text-gray-500" : "text-gray-400"}`}>Email</span>
-                  <span className={`font-medium truncate ${isDark ? "text-gray-300" : "text-gray-600"}`} title={student.email}>{student.email}</span>
+                  <span className={`font-medium truncate ${isDark ? "text-gray-300" : "text-gray-600"}`} title={student.email}>
+                    {student.email}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className={isDark ? "text-gray-500" : "text-gray-400"}>Student ID</span>
@@ -326,10 +378,9 @@ function ViewStudentCards() {
 
               <div className="flex-grow" />
 
-              {/* Button */}
               <Link to="/viewStudentDetails">
                 <button
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl text-sm font-semibold transition cursor-pointer"
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white py-2 rounded-xl text-sm font-semibold transition cursor-pointer"
                   onClick={() => localStorage.setItem("CurrentViewDetails", JSON.stringify(student))}
                 >
                   View Details
@@ -338,8 +389,13 @@ function ViewStudentCards() {
             </div>
           ))
         ) : (
-          <div className="col-span-full text-center py-16">
-            <p className={`text-lg font-medium ${isDark ? "text-gray-600" : "text-gray-400"}`}>No students added till now</p>
+          <div className="col-span-full flex flex-col items-center justify-center py-24 gap-3">
+            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl
+              ${isDark ? "bg-gray-800" : "bg-gray-100"}`}>
+              🎓
+            </div>
+            <p className={`text-base font-semibold ${isDark ? "text-gray-500" : "text-gray-400"}`}>No students found</p>
+            <p className={`text-sm ${isDark ? "text-gray-600" : "text-gray-300"}`}>Try changing the filter or data source</p>
           </div>
         )}
       </div>
