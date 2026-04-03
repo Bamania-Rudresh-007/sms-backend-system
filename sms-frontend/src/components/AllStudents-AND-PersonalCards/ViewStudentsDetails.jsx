@@ -91,7 +91,7 @@ function ViewStudentDetails() {
           {/* Unique ID */}
           <div>
             <h4 className={`font-medium mb-1 ${isDark ? "text-gray-400" : "text-gray-600"}`}>Student ID</h4>
-            <p className={`font-semibold ${isDark ? "text-white" : "text-gray-800"}`}>{currentStudent.id}</p>
+            <p className={`font-semibold ${isDark ? "text-white" : "text-gray-800"}`}>{currentStudent._id}</p>
           </div>
 
           {/* Email */}

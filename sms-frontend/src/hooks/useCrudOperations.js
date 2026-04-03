@@ -51,8 +51,13 @@ export default function useStudentServices() {
     };
 
     // Handles the logic for updating students data
-    const updateStudent = (updatedStudent) => {
-        setStudents((prev) => prev.map(item => item.id == updatedStudent.id ? updatedStudent: item))
+    const updateStudent = async(updatedStudent) => {
+        // setStudents((prev) => prev.map(item => item.id == updatedStudent.id ? updatedStudent: item))
+        console.log(updatedStudent)
+
+        const res = await API.patch(`/students/${updatedStudent._id}`, updatedStudent)
+        console.log(res)           
+
     };
 
     const deleteStudent = (data) => {

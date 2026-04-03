@@ -104,7 +104,7 @@ function UpdateStudent() {
               type="text"
               placeholder="Enter student ID"
               id='id'
-              value={updatedStudent.id}
+              value={updatedStudent._id}
               onChange={(e) => handleChange(e)}
               className={inputClass}
             />
