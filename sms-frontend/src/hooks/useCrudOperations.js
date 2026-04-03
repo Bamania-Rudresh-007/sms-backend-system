@@ -4,19 +4,22 @@ import API from "../api/api.js"
 export default function useStudentServices() {
 
     // handles the storing and updating part of new students in local storage
-    const [students , setStudents] = useState(() => {
-        try {
-        const storedStudents = localStorage.getItem("students");
-        return storedStudents ? JSON.parse(storedStudents) : [];            
-        } catch (error) {
-            console.error("Failed to fetch students data from local Storage...", error);
-            return [];
-        }
-    });
+    const [students , setStudents] = useState([]);
 
     useEffect(() => {
-        localStorage.setItem("students", JSON.stringify(students));
-    }, [students])
+        const fetchStudents = async() => {
+            try {
+                const data = await API.get("/students");
+                console.log(data.data.data);
+                setStudents(data.data.data || []);
+            } catch (error) {
+                console.error("Failed to fetch students: ", error);
+                return [];
+            }
+        }
+
+        fetchStudents()
+    }, [])
 
     // Unique id generator
     const UniqueIdGenerator = () => {

@@ -291,7 +291,7 @@ function ViewStudentCards() {
         {filterStudents && filterStudents.length > 0 ? (
           filterStudents.map((student) => (
             <div
-              key={student.id}
+              key={student._id}
               className={`rounded-2xl shadow-sm border p-5 flex flex-col hover:shadow-md transition ${isDark ? "bg-gray-800 border-gray-700 hover:border-indigo-500" : "bg-white border-gray-100 hover:border-indigo-100"}`}
             >
               {/* Avatar + Name + Course */}
@@ -320,7 +320,7 @@ function ViewStudentCards() {
                 </div>
                 <div className="flex justify-between">
                   <span className={isDark ? "text-gray-500" : "text-gray-400"}>Student ID</span>
-                  <span className={`font-medium ${isDark ? "text-gray-300" : "text-gray-600"}`}>{student.id}</span>
+                  <span className={`font-medium truncate pl-1 ${isDark ? "text-gray-300" : "text-gray-600"}`}>{student._id}</span>
                 </div>
               </div>
 
