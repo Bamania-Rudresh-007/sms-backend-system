@@ -13,45 +13,33 @@ import DeleteStudent from "./components/CRUD-OPERATIONS/DeleteStudent.jsx";
 import ViewStudentCards from "./components/AllStudents-AND-PersonalCards/ViewStudentCards.jsx";
 import { StudentsProvider } from "./contexts/StudentsContext.jsx";
 import ViewStudentDetails from "./components/AllStudents-AND-PersonalCards/ViewStudentsDetails.jsx";
+import ProtectedRoute from "./hooks/autoRedirect.jsx";
 
-const isLogin = JSON.parse(localStorage.getItem("isLogin"))
+const RootElement = () => {
+  const isLogin = JSON.parse(localStorage.getItem("isLogin"));
+
+  return isLogin ? <Navigate to="/home" replace /> : <Welcome />;
+};
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: isLogin ? <Navigate to="/home"/> : <Welcome />
+    element: <RootElement />,        
   },
+  { path: "/login", element: <LogIn /> },
+  { path: "/signup", element: <SignUp /> },
+  
+  // PROTECTED GROUP
   {
-    path: "/login",
-    element: <LogIn />,
-  },
-  {
-    path: "/signup",
-    element: <SignUp />,
-  },
-  {
-    path: "/home",
-    element: <Home />
-  },
-  {
-    path: "/addStudent",
-    element: <AddStudent />
-  },
-  {
-    path: "/updateStudent",
-    element: <UpdateStudent />
-  },
-  {
-    path: "/deleteStudent",
-    element: <DeleteStudent />
-  },
-  {
-    path: "/viewStudents",
-    element: <ViewStudentCards   />
-  },
-  {
-    path: "/viewStudentDetails",
-    element: <ViewStudentDetails   />
+    element: <ProtectedRoute />, // All children below will only be accessible if user is registered
+    children: [
+      { path: "/home", element: <Home /> },
+      { path: "/addStudent", element: <AddStudent /> },
+      { path: "/updateStudent", element: <UpdateStudent /> },
+      { path: "/deleteStudent", element: <DeleteStudent /> },
+      { path: "/viewStudents", element: <ViewStudentCards /> },
+      { path: "/viewStudentDetails", element: <ViewStudentDetails /> },
+    ]
   },
 ]);
 
