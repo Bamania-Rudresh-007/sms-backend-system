@@ -4,6 +4,7 @@ const UsersContext = createContext();
 export function UsersProvider({ children }) {
     const [signUpUser, setSignUpUser] = useState({ name: "", email: "", password: "" });
     const [loginUser, setLoginUser] = useState({email: "", password: ""});
+    const [loading, setLoading] = useState(true);
 
 
 
@@ -28,6 +29,8 @@ export function UsersProvider({ children }) {
     setSignUpUser,
     loginUser,
     setLoginUser,
+    loading,
+    setLoading,
   };
 
   return (
