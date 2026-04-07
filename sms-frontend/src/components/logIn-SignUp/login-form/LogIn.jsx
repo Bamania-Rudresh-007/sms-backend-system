@@ -1,9 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import InputPass from "./inputPass";
 import { useUsers } from "../../../contexts/UsersContext.jsx"
-import Home from "../../Home/Home.jsx";
 import API from "../../../api/api.js";
 
 function LogIn() {
@@ -14,7 +13,7 @@ function LogIn() {
     const [passType, setPassType] = useState("password");
 
     // the main source of indentifing wheather the loginUser is logdin or not..
-    const { loginUser, setLoginUser} = useUsers();
+    const { loginUser, setLoginUser, loading, setLoading} = useUsers();
 
     // storing loginUser email pass to check wheather they are signed up or not!!
     const handleChange = (e) => {
@@ -26,23 +25,24 @@ function LogIn() {
 
     const handleVarificationOfUser = async () => {
         
-        if(!loginUser.email.includes("@") || loginUser.password === "" ){
-            alert("Invalid email or password");
-        }
+        // if(!loginUser.email.includes("@") || loginUser.password === "" ){
+        //     alert("Invalid email or password");
+        // }
         
-        let isLogin = false;
+        // let isLogin = false;
 
-        await API.post("/auth/login", loginUser)
-            .then((res) => {
-                console.log("User logined successfully", res);
-                localStorage.setItem("sms-token", JSON.stringify(res.data.token));
-                isLogin = true;
-            })
-            .catch((err) => console.error(err))
+        // await API.post("/auth/login", loginUser)
+        //     .then((res) => {
+        //         console.log("User logined successfully", res);
+        //         localStorage.setItem("sms-token", JSON.stringify(res.data.token));
+        //         isLogin = true;
+        //     })
+        //     .catch((err) => console.error(err))
 
-        if (isLogin) {
-            navigate("/home");
-        }
+        // if (isLogin) {
+        //     navigate("/home");
+        // }
+        console.log("Clicked", loading);
     };
 
 
