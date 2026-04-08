@@ -5,10 +5,11 @@ import InputPass from "./inputPass.jsx";
 import { useState } from "react";
 import { useUsers } from "../../../contexts/UsersContext.jsx";
 import API from "../../../api/api.js";
+import ButtonLoader from "../../Loder.jsx";
 
 function SignUp() {
 
-  const { setMember, arrayOfMember, setIsLogin,  signUpUser, setSignUpUser} = useUsers();
+  const { setIsLogin,  signUpUser, setSignUpUser, isLoading, setIsLoading } = useUsers();
 
 //   const [signUpUser, setSignUpUser] = useState({ name: "", email: "", password: "" });
   const [passType, setPassType] = useState("password");
@@ -22,14 +23,16 @@ function SignUp() {
 
   //  handles the submit button of the signUp Form 
   const handleSubmit = (e) => {
-
-    if (!signUpUser.name == "" && !signUpUser.email == "" || !signUpUser.password == "") {
-      console.log("Signup User:- ", signUpUser)
-        API.post("/auth/signup", signUpUser)
+      
+      if (!signUpUser.name == "" && !signUpUser.email == "" || !signUpUser.password == "") {
+          setIsLoading(true)
+          console.log("Signup User:- ", signUpUser)
+          API.post("/auth/signup", signUpUser)
             .then((res) => {
                 console.log(res)
             if(res.data.message === "User stored in database successfully"){
                     console.log(true)
+                    setIsLoading(false)
                     localStorage.setItem("sms-token", JSON.stringify(res.data.token));
                     setIsLogin(() => {
                         localStorage.setItem("isLogin", JSON.stringify(true));
@@ -97,15 +100,19 @@ function SignUp() {
               setPassType={setPassType}
               value={signUpUser.password}
             />
+            <ButtonLoader onClick={handleSubmit} styles={'w-full mt-4 flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-500 text-white font-semibold py-2 rounded-md transition cursor-pointer'} loading={isLoading}>
+                {/* <button
+                type="submit"
+                className="w-full mt-4 flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-500 text-white font-semibold py-2 rounded-md transition cursor-pointer"
+                onClick={handleSubmit}
+                >
+                <FaSignInAlt />
+                Sign Up
+                </button> */}
+                <FaSignInAlt />
+                Sign Up
+            </ButtonLoader>
 
-            <button
-              type="submit"
-              className="w-full mt-4 flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-500 text-white font-semibold py-2 rounded-md transition cursor-pointer"
-              onClick={handleSubmit}
-            >
-              <FaSignInAlt />
-              Sign Up
-            </button>
 
             <div className="flex gap-4.5">
               <p>If you already have an account?</p>
