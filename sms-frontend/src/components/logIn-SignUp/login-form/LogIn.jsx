@@ -4,6 +4,7 @@ import { useState } from "react";
 import InputPass from "./inputPass";
 import { useUsers } from "../../../contexts/UsersContext.jsx"
 import API from "../../../api/api.js";
+import ButtonLoader from "../../Loder.jsx";
 
 function LogIn() {
     // navigate to navigate anywhere in webpage
@@ -13,7 +14,7 @@ function LogIn() {
     const [passType, setPassType] = useState("password");
 
     // the main source of indentifing wheather the loginUser is logdin or not..
-    const { loginUser, setLoginUser, loading, setLoading} = useUsers();
+    const { loginUser, setLoginUser, isLoading, setIsLoading} = useUsers();
 
     // storing loginUser email pass to check wheather they are signed up or not!!
     const handleChange = (e) => {
@@ -25,24 +26,30 @@ function LogIn() {
 
     const handleVarificationOfUser = async () => {
         
-        if(!loginUser.email.includes("@") || loginUser.password === "" ){
-            alert("Invalid email or password");
-        }
+        // if(!loginUser.email.includes("@") || loginUser.password === "" ){
+        //     alert("Invalid email or password");
+        // }
         
-        let isLogin = false;
+        // let isLogin = false;
 
-        await API.post("/auth/login", loginUser)
-            .then((res) => {
-                console.log("User logined successfully", res);
-                localStorage.setItem("sms-token", JSON.stringify(res.data.token));
-                isLogin = true;
-            })
-            .catch((err) => console.error(err))
+        // await API.post("/auth/login", loginUser)
+        //     .then((res) => {
+        //         console.log("User logined successfully", res);
+        //         localStorage.setItem("sms-token", JSON.stringify(res.data.token));
+        //         isLogin = true;
+        //     })
+        //     .catch((err) => console.error(err))
 
-        if (isLogin) {
-            navigate("/home");
+        // if (isLogin) {
+        //     navigate("/home");
+        // }
+        if(isLoading){
+            setIsLoading(false);
         }
-        console.log("Clicked", loading);
+        else{
+            setIsLoading(true);
+        }
+        console.log("Clicked", isLoading);
     };
 
 
@@ -88,13 +95,11 @@ function LogIn() {
             </div>
 
             <div className="w-full mt-5">
-              <button className="w-full flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-500 text-white font-semibold py-2 rounded-md transition"
-              onClick={() => {
-                handleVarificationOfUser();
-              }}
-              >
-                <FaUser /> Login
-              </button>
+                <ButtonLoader loading={isLoading} onClick={() => {
+                        handleVarificationOfUser();
+                    }}  styles={'w-full flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-500 text-white font-semibold py-2 rounded-md transition'}>
+                        <FaUser /> Login
+                </ButtonLoader>
             </div>
 
             <div className="flex mt-4">
