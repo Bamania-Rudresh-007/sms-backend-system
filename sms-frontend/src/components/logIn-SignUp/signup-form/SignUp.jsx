@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaSignInAlt } from "react-icons/fa";
 import SignUpInput from "./Input.jsx";
 import InputPass from "./inputPass.jsx";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useUsers } from "../../../contexts/UsersContext.jsx";
 import API from "../../../api/api.js";
 
